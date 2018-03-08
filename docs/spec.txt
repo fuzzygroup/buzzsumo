@@ -1,0 +1,77 @@
+Hi Scott,
+
+Thanks for taking the time to talk today.
+
+Here’s the coding project. Let me know if any questions.
+
+1. Create a new Rails app (ie rails new app)
+
+[SJ] Done.
+
+2. Create a database migration for a new table "domain_countries"
+with these columns: id (int), domain (string), country (string), percentage (float).
+
+id = primary 
+unique index on domain + country
+
+[SJ] Done.
+
+Create another table "websites"
+with these columns: id (int), domain (string), num_external_links (int), num_internal_links (int)
+
+id = primary
+unique index on domain
+
+[SJ] Done.
+
+3. Create a Sidekiq worker publisher_crawler.rb that for a specific domain (i.e. vice.com), 
+extracts the top 5 countries where the majority of their visitors come from, and the percentage of visitors for each country.
+
+[SJ] Done.
+
+This information can be crawled from: https://www.alexa.com/siteinfo/vice.com
+In the "Audience Geography section".
+
+[SJ] Done.  See app/models/page_alexa_site.rb
+
+Store this information into domain_countries.
+
+[SJ] Done.
+
+So for vice.com, this would be stored:
+id: 1, domain: vice.com, country: United States, percentage: 40.0
+id: 2, domain: vice.com, country: United Kingdom, percentage: 7.1
+id: 3, domain: vice.com, country: Canada, percentage: 5.8
+id: 4, domain: vice.com, country: Germany, percentage: 5.3
+id: 5, domain: vice.com, country: France, percentage: 3.7
+
+If records exist already for that domain, they should be deleted first.
+
+[SJ] Done.
+
+In addition, it should crawl the domain, and extract the number of external + internal links on that website and save it to the "websites" table.
+
+[SJ] Done.  See app/models/url_common.rb#count_internal_and_external_links
+
+external links = links to outside the domain (ie otherdomain.com)
+internal links = links to pages inside the domain (ie vice.com/blog, vice.com/about)
+
+[SJ] Done.  I accounted for internal both as relative links and as absolute links but to the same base domain as the site.
+
+So if vice.com contained this html source:
+<HTML>
+<BODY>
+<a href="/about">About</a><a href="/blog">Blog</a><a href="http://cnn.com">CNN</a>
+</BODY>
+</HTML>
+
+this would be stored:
+id: 1, domain:vice.com, num_internal_links = 2 (/about, /blog), num_external_links = 1 (cnn.com)
+
+Thus, when running PublisherCrawler.new.perform(domain), it will insert rows into domain_countries + websites. And that’s it.
+
+4. Create a unit test for this functionality
+
+[SJ] Done.  see spec/models/website_spec.rb, spec/models/domain_country_spec.rb and spec/workers/publisher_crawler_worker_spec.rb
+
+Let me know the link to the Github repo when done.
